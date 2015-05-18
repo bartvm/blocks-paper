@@ -80,7 +80,7 @@ prototyping of complex neural network models. \emph{Fuel}
     away Theano
   \item Lasagne, Keras: Stronger focus on easy implementation of existing models
     than the development of new models
-  \item scikit-learn: Less plug-and-play, more research-oriented
+  \item scikit-learn: More plug-and-play, less research-oriented
 \end{itemize}
 
 \section{Blocks}
@@ -98,8 +98,8 @@ variables, for example the weight matrix of a linear transformation or the
 filters of a convolutional layer. Bricks use these parameters to transform
 symbolic Theano variables, potentially in multiple ways. % Example: Softmax cost vs. output
 
-Bricks can contain other bricks within them. This effectively introduces a of
-hierarchical structure on top of the flat computation graph defined by Theano,
+Bricks can contain other bricks within them. This effectively introduces a
+hierarchy of structures on top of the flat computation graph defined by Theano,
 which makes it easier to address and configure complex models programmatically.
 
 The parameters of bricks can be initialized using a variety of schemes that are
@@ -110,7 +110,7 @@ Large neural networks can often result in Theano computation graphs containing
 hundreds of variables and operations. Blocks does not attempt to abstract away
 this complex graph, but to make it manageable by annotating variables in the
 graph. Each input, output, and parameter of a brick is annotated as such.
-Variables can also be annotated with the role they play in model, such as
+Variables can also be annotated with the role they play in a model, such as
 \emph{weights}, \emph{biases}, \emph{filters}, etc. A series of convenience
 tools were written that allow users to filter the symbolic computation graph
 based on these annotations, resulting in an approach that allows for powerful
