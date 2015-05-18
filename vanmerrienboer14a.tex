@@ -1,0 +1,193 @@
+\documentclass[twoside,11pt]{article}
+
+% Any additional packages needed should be included after jmlr2e.
+% Note that jmlr2e.sty includes epsfig, amssymb, natbib and graphicx,
+% and defines many common macros, such as 'proof' and 'example'.
+%
+% It also sets the bibliographystyle to plainnat; for more information on
+% natbib citation styles, see the natbib documentation, a copy of which
+% is archived at http://www.jmlr.org/format/natbib.pdf
+
+\usepackage{jmlr2e}
+\usepackage{hyperref}
+
+% Heading arguments are {volume}{year}{pages}{submitted}{published}{author-full-names}
+
+\jmlrheading{1}{2015}{?-??}{5/15}{??/??}{Bart van Merri\"{e}nboer, Dzmitry
+Bahdanau, Jan Chorowski, Vincent Dumoulin, Dmitriy Serdyuk, David
+Wade-Farley, and Yoshua Bengio}
+
+% Short headings should be running head and authors last names
+
+\ShortHeadings{Blocks and Fuel}{Van Merri\"{e}nboer et al.}
+\firstpageno{1}
+
+\begin{document}
+
+\title{Blocks and Fuel: GPU-accelerated neural networks for large data}
+
+\author{\name Bart van Merri\"{e}nboer \email bart.van.vanmerrienboer@umontreal.ca \\
+        \addr Montreal Institute for Learning Algorithms, University of Montreal, Montreal, Canada
+        \AND
+        \name Dzmitry Bahdanau \email d.bahdanau@jacobs-university.de \\
+        \addr Jacobs University, Bremen, Germany
+        \AND
+        \name Jan Chorowski \email jan.chorowski@ii.uni.wroc.pl \\
+        \addr University of Wroc\l aw, Wroc\l aw, Poland
+        \AND
+        \name Vincent Dumoulin \email dumouliv@iro.umontreal.ca \\
+        \name Dmitriy Serdyuk \email serdyuk.dmitriy@gmail.com \\
+        \name David Wade-Farley \email david.wade-farley@umontreal.ca \\
+        \name Yoshua Bengio \email yoshua.bengio@umontreal.ca \\
+        \addr Montreal Institute for Learning Algorithms, University of Montreal, Montreal, Canada}
+
+\editor{?}
+
+\maketitle
+
+\begin{abstract}%   <- trailing '%' for backward compatibility of .sty file
+  We introduce two Python frameworks to train neural networks on large
+  datasets: \emph{Blocks} and \emph{Fuel}. \emph{Blocks} is based on the
+  Theano, a linear algebra compiler with
+  CUDA-support~\citep{Bastien-Theano-2012,bergstra+al:2010-scipy}. It
+  facilitates the training of complex neural network models by providing
+  parametrized Theano operations, attaching metadata to Theano's symbolic
+  computation graph, and providing an extensive set of utilities to assist
+  training the networks, e.g.\ training algorithms, logging, monitoring,
+  visualization, and serialization. \emph{Fuel} provides a standard format for
+  machine learning datasets. It allows the user to easily iterate over large
+  datasets, performing many types of pre-processing on the fly.
+\end{abstract}
+
+\begin{keywords}
+  Neural networks, GPGPU, large-scale machine learning
+\end{keywords}
+
+\section{Introduction}
+
+\emph{Blocks} is a framework that builds on Theano to facilitate the training of
+neural networks. It is being developed by the Montreal Institute of Learning
+Algorithms (MILA) at the University of Montreal. Its focus lies on quick
+prototyping of complex neural network models. \emph{Fuel} 
+
+\section{History}
+
+% Pylearn2 has this section, do we need it?
+% Maybe a comparison with other frameworks here?
+
+\begin{itemize}
+  \item Pylearn2: More general (machine learning vs.\ neural networks), abstracts
+    away Theano
+  \item Lasagne, Keras: Stronger focus on easy implementation of existing models
+    than the development of new models
+  \item scikit-learn: Less plug-and-play, more research-oriented
+\end{itemize}
+
+\section{Blocks}
+
+Theano is a popular choice for the implementation of neural networks (see
+e.g.~\cite{Goodfellow-et-al-ICML2013, Pascanu-et-al-ICML2013}). Blocks and many
+other libraries, such as Pylearn2~\cite{pylearn2_arxiv_2013}, build on Theano
+by providing reusable components that are common in neural networks, such as
+linear transformations followed by non-linear activations, or more complicated
+components such as LSTM units. In Blocks these components are referred ot as
+\emph{bricks} or ``parametrized Theano operations''.
+
+Bricks take the form of a set of parameters in the form of Theano shared
+variables, for example the weight matrix of a linear transformation or the
+filters of a convolutional layer. Bricks use these parameters to transform
+symbolic Theano variables, potentially in multiple ways. % Example: Softmax cost vs. output
+
+Bricks can contain other bricks within them. This effectively introduces a of
+hierarchical structure on top of the flat computation graph defined by Theano,
+which makes it easier to address and configure complex models programmatically.
+
+The parameters of bricks can be initialized using a variety of schemes that are
+popular in the neural network literature, such as sparse initialization,
+orthogonal initialization for recurrent weights, etc.
+
+Large neural networks can often result in Theano computation graphs containing
+hundreds of variables and operations. Blocks does not attempt to abstract away
+this complex graph, but to make it manageable by annotating variables in the
+graph. Each input, output, and parameter of a brick is annotated as such.
+Variables can also be annotated with the role they play in model, such as
+\emph{weights}, \emph{biases}, \emph{filters}, etc. A series of convenience
+tools were written that allow users to filter the symbolic computation graph
+based on these annotations, resulting in an approach that allows for powerful
+queries such as ``Apply weight noise to all weights that belong to an LSTM
+unit whose parent is a brick with the name \ldots''
+
+\section{Fuel}
+
+Fuel's goal is to provide a common interface to a variety of data formats and
+published datasets such as MNIST, CIFAR-10, ImageNet, etc.\ while making it easy
+for users to write an interface to new datasets. Fuel allows for efficient ways
+of iterating over these datasets (sequentially, shuffled, minibatches, etc.).
+It also provides a variety of on-the-fly preprocessing methods such as random
+cropping of images, creating n-grams from text files, and the ability to
+implement many other methods easily.
+
+Blocks relies on Fuel for its data interface, but Fuel can easily be used by
+other machine learning frameworks that interface with datasets.
+
+\section{Serialization and checkpointing}
+
+The training of large, deep neural networks can often take days or even weeks.
+Hence, regular checkpointing of training progress is important. Blocks aims to
+make the resumption of experiments entirely transparent, even across platforms,
+while ensuring the reproducibility of these experiments.
+
+This goal is complicated by shortcomings in Python's \textsc{Pickle}
+serialization module, which is unable to serialize many iterators, which Fuel
+heavily depends on in order to iterate over large datasets efficiently. To
+circumvent this we reimplemented the \textsc{itertools} from the Python
+standard library to be serializable.
+
+As a result, Blocks experiments are able to be interrupted in the middle of a
+pass over the dataset, serialized, and resumed later, without affecting the
+final training results.
+
+\section{Documentation and community}
+
+Blocks and Fuel are well documented, with both API documentation and tutorials
+available online. Two active mailing
+lists\footnote{\url{https://groups.google.com/d/forum/blocks-users} and
+\url{https://groups.google.com/d/forum/fuel-users}} support users of the
+libraries. A seperate
+repository\footnote{\url{https://github.com/mila-udem/blocks-examples}} is
+maintained for users to contribute non-trivial examples of the use of Blocks.
+Implementations of neural machine translation models
+(NMT,~\cite{bahdanau2015neural}) and the Deep Recurrent Attentive Writer
+(DRAW,~\cite{gregor2015draw}) model are publicly available examples of
+state-of-the-art models succesfully implemented using Blocks.
+
+\section{NOTES}
+
+Some topics to discuss?
+
+\begin{itemize}
+  \item Serialization/resumability
+  \item ``Bricks'' i.e.\ parametrized Theano operations
+  \item Graph management through annotation, hierarchy
+  \item Implementations of GRU, LSTM, attention mechanism, convolutional
+  networks
+  \item Monitoring non-Theano variables, aggregation, plotting results
+\end{itemize}
+
+\begin{itemize}
+  \item Automatic downloading and converting of files
+  \item Standard HDF5 format that conveys axis semantics, splits, etc.
+\end{itemize}
+
+
+% Acknowledgements should go at the end, before appendices and references
+
+\acks{The authors would like to acknowledge the support of the following
+  agencies for research funding and computing support: NSERC, Calcul Qu\'{e}bec,
+  Compute Canada, the Canada Research Chairs and CIFAR\@. We would also like to
+  thank the developers of Theano.}
+
+
+\bibliography{bibliography}
+
+\end{document}
