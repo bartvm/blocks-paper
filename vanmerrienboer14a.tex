@@ -13,13 +13,14 @@
 
 \usepackage{courier}
 \usepackage{listings}
+\usepackage{todonotes}
 \lstset{basicstyle=\footnotesize\ttfamily}
 
 % Heading arguments are {volume}{year}{pages}{submitted}{published}{author-full-names}
 
-\jmlrheading{1}{2015}{?-??}{5/15}{??/??}{Bart van Merri\"{e}nboer, Dzmitry
-Bahdanau, Jan Chorowski, Vincent Dumoulin, Dmitriy Serdyuk, David
-Warde-Farley, and Yoshua Bengio}
+% \jmlrheading{1}{2015}{?-??}{5/15}{??/??}{Bart van Merri\"{e}nboer, Dzmitry
+% Bahdanau, Jan Chorowski, Vincent Dumoulin, Dmitriy Serdyuk, David
+% Warde-Farley, and Yoshua Bengio}
 
 % Short headings should be running head and authors last names
 
@@ -45,7 +46,7 @@ Warde-Farley, and Yoshua Bengio}
         \name Yoshua Bengio \email yoshua.bengio@umontreal.ca \\
         \addr Montreal Institute for Learning Algorithms, University of Montreal, Montreal, Canada}
 
-\editor{?}
+% \editor{?}
 
 \maketitle
 
@@ -69,25 +70,22 @@ Warde-Farley, and Yoshua Bengio}
 
 \section{Introduction}
 
-\emph{Blocks} is a framework that builds on Theano to facilitate the training of
-neural networks. It is being developed by the Montreal Institute of Learning
-Algorithms (MILA) at the University of Montreal. Its focus lies on quick
-prototyping of complex neural network models. \emph{Fuel} 
+\emph{Blocks} and \emph{Fuel} are being developed by the Montreal Institute of
+Learning Algorithms (MILA) at the University of Montreal. Their focus lies on
+quick prototyping of complex neural network models. The intended target
+audience is researchers.
 
-\section{History}
+Several other libraries built on top of Theano exist, including Pylearn2 (also
+developed by MILA), Lasagne, Keras and GroundHog. Blocks differentiates itself
+with a strong focus on research, and through its relationship with Theano.
+Instead of introducing new abstract objects representing `models' or `layers',
+Blocks annotates the Theano computation graph, maintaining the flexibility of
+Theano while making large models manageable.
 
-% Pylearn2 has this section, do we need it?
-% Maybe a comparison with other frameworks here?
-
-\begin{itemize}
-  \item Pylearn2: More general (machine learning vs.\ neural networks), abstracts
-    away Theano
-  \item Lasagne, Keras: Stronger focus on easy implementation of existing models
-    than the development of new models
-    % Lasagne simply does not have any data processing. By
-    % the way, it would by nice to try and sell them Fuel.
-  \item scikit-learn: More plug-and-play, less research-oriented
-\end{itemize}
+Data processing is an integral part of training neural networks, which is not
+addressed by many of the aforementioned frameworks. \emph{Fuel}, inspired by
+projects such as \textsc{skdata}\footnote{https://jaberg.github.io/skdata/},
+aims to fill this gap.
 
 \section{Blocks}
 
@@ -102,7 +100,7 @@ components such as LSTM units. In Blocks these components are referred ot as
 Bricks take the form of a set of parameters in the form of Theano shared
 variables, for example the weight matrix of a linear transformation or the
 filters of a convolutional layer. Bricks use these parameters to transform
-symbolic Theano variables, potentially in multiple ways. % Example: Softmax cost vs. output
+symbolic Theano variables, potentially in multiple ways.
 
 Bricks can contain other bricks within them. This effectively introduces a
 hierarchy of structures on top of the flat computation graph defined by Theano,
@@ -123,15 +121,21 @@ based on these annotations, resulting in an approach that allows for powerful
 queries such as ``Apply weight noise to all weights that belong to an LSTM
 unit whose parent is a brick with the name \ldots''
 
+Blocks comes with a large number of `bricks'. Besides standard activations and
+transformations used in feedforward networks (maxout, convolutional layers,
+table lookups) these also include a variety of more advanced recurrent neural
+network (RNN) bricks (LSTM, GRU, support for `attention mechanisms').
+
 \section{Fuel}
 
 Fuel's goal is to provide a common interface to a variety of data formats and
 published datasets such as MNIST, CIFAR-10, ImageNet, etc.\ while making it easy
-for users to write an interface to new datasets. Fuel allows for efficient ways
-of iterating over these datasets (sequentially, shuffled, minibatches, etc.).
-It also provides a variety of on-the-fly preprocessing methods such as random
-cropping of images, creating n-grams from text files, and the ability to
-implement many other methods easily.
+for users to write an interface to new datasets. Fuel allows for different ways
+of iterating over these datasets, such as sequential or shuffled minibatches,
+support for in-memory and out-of-core datasets, and resampling (cross
+validation, bootstrapping). It also provides a variety of on-the-fly
+preprocessing methods such as random cropping of images, creating n-grams from
+text files, and the ability to implement many other methods easily.
 
 Blocks relies on Fuel for its data interface, but Fuel can easily be used by
 other machine learning frameworks that interface with datasets.
@@ -149,15 +153,15 @@ class. Given a series of assumptions about how data is organized within an HDF5
 file, it is able to parse:
 
 \begin{itemize}
-\item What are the data sources available (e.g. features, targets, etc.)?
-\item How are these data sources officially split (e.g. training, test sets)?
-\item Are some data sources unavailable for some splits (e.g. test set only
+\item What are the data sources available (e.g.\ features, targets, etc.)?
+\item How are these data sources officially split (e.g.\ training, test sets)?
+\item Are some data sources unavailable for some splits (e.g.\ test set only
       offers unlabeled examples)?
-\item What are the axes semantics for a given data source (e.g. batch, feature,
+\item What are the axes semantics for a given data source (e.g.\ batch, feature,
       width, height, channel, time, etc.)?
 \end{itemize}
 
-TODO: explain these assumptions in more details?
+\todo[inline]{Explain these assumptions in more details?}
 
 This class is flexible enough that most built-in datasets are little more than a
 wrapper that defines the default location of the dataset file and some sensible
@@ -226,34 +230,10 @@ Implementations of neural machine translation models
 (DRAW,~\cite{gregor2015draw}) model are publicly available examples of
 state-of-the-art models succesfully implemented using Blocks.
 
-\section{NOTES}
-
-Some topics to discuss?
-
-\begin{itemize}
-  \item Serialization/resumability
-  \item ``Bricks'' i.e.\ parametrized Theano operations
-  \item Graph management through annotation, hierarchy
-  \item Implementations of GRU, LSTM, attention mechanism, convolutional
-  networks
-  \item Monitoring non-Theano variables, aggregation, plotting results
-  \item Composing custom algorithms from bits and pieces
-      called step rules
-\end{itemize}
-
-\begin{itemize}
-  \item Automatic downloading and converting of files
-  \item Standard HDF5 format that conveys axis semantics, splits, etc.
-\end{itemize}
-
-
-% Acknowledgements should go at the end, before appendices and references
-
 \acks{The authors would like to acknowledge the support of the following
   agencies for research funding and computing support: NSERC, Calcul Qu\'{e}bec,
   Compute Canada, the Canada Research Chairs and CIFAR\@. We would also like to
   thank the developers of Theano.}
-
 
 \bibliography{bibliography}
 
