@@ -13,8 +13,6 @@
 
 \usepackage{courier}
 \usepackage{listings}
-\usepackage{todonotes}
-\lstset{basicstyle=\footnotesize\ttfamily}
 
 % Heading arguments are {volume}{year}{pages}{submitted}{published}{author-full-names}
 
@@ -29,7 +27,7 @@
 
 \begin{document}
 
-\title{Blocks and Fuel: GPU-accelerated neural networks for large data}
+\title{Blocks and Fuel}
 
 \author{\name Bart van Merri\"{e}nboer \email bart.van.vanmerrienboer@umontreal.ca \\
         \addr Montreal Institute for Learning Algorithms, University of Montreal, Montreal, Canada
@@ -83,50 +81,72 @@ Blocks annotates the Theano computation graph, maintaining the flexibility of
 Theano while making large models manageable.
 
 Data processing is an integral part of training neural networks, which is not
-addressed by many of the aforementioned frameworks. \emph{Fuel}, inspired by
-projects such as \textsc{skdata}\footnote{https://jaberg.github.io/skdata/},
-aims to fill this gap.
+addressed by many of the aforementioned frameworks. \emph{Fuel} aims to fill
+this gap. It provides tools to download datasets and iterate/preprocess them
+efficiently.
 
 \section{Blocks}
 
+Blocks comprises several components, which can be used independently from each
+other.
+
+\subsection{Bricks}
+
 Theano is a popular choice for the implementation of neural networks (see
 e.g.~\cite{Goodfellow-et-al-ICML2013, Pascanu-et-al-ICML2013}). Blocks and many
-other libraries, such as Pylearn2~\cite{pylearn2_arxiv_2013}, build on Theano
+other libraries, such as Pylearn2~\citep{pylearn2_arxiv_2013}, build on Theano
 by providing reusable components that are common in neural networks, such as
 linear transformations followed by non-linear activations, or more complicated
-components such as LSTM units. In Blocks these components are referred ot as
+components such as LSTM units. In Blocks these components are referred to as
 \emph{bricks} or ``parametrized Theano operations''.
 
-Bricks take the form of a set of parameters in the form of Theano shared
-variables, for example the weight matrix of a linear transformation or the
-filters of a convolutional layer. Bricks use these parameters to transform
-symbolic Theano variables, potentially in multiple ways.
+Bricks consist of a set of Theano shared variables, for example the weight
+matrix of a linear transformation or the filters of a convolutional layer.
+Bricks use these parameters to transform symbolic Theano variables.
 
-Bricks can contain other bricks within them. This effectively introduces a
-hierarchy of structures on top of the flat computation graph defined by Theano,
-which makes it easier to address and configure complex models programmatically.
+Bricks can contain other bricks within them. This introduces a hierarchy on top
+of the flat computation graph defined by Theano, which makes it easier to
+address and configure complex models programmatically.
 
 The parameters of bricks can be initialized using a variety of schemes that are
 popular in the neural network literature, such as sparse initialization,
 orthogonal initialization for recurrent weights, etc.
+
+Blocks comes with a large number of `bricks'. Besides standard activations and
+transformations used in feedforward networks (maxout, convolutional layers,
+table lookups) these also include a variety of more advanced recurrent neural
+network components (LSTM, GRU, support for attention mechanisms).
+
+\subsection{Graph management}
 
 Large neural networks can often result in Theano computation graphs containing
 hundreds of variables and operations. Blocks does not attempt to abstract away
 this complex graph, but to make it manageable by annotating variables in the
 graph. Each input, output, and parameter of a brick is annotated as such.
 Variables can also be annotated with the role they play in a model, such as
-\emph{weights}, \emph{biases}, \emph{filters}, etc. A series of convenience
-tools were written that allow users to filter the symbolic computation graph
-based on these annotations, resulting in an approach that allows for powerful
-queries such as ``Apply weight noise to all weights that belong to an LSTM
-unit whose parent is a brick with the name \ldots''
+\emph{weights}, \emph{biases}, \emph{filters}, etc.
 
-Blocks comes with a large number of `bricks'. Besides standard activations and
-transformations used in feedforward networks (maxout, convolutional layers,
-table lookups) these also include a variety of more advanced recurrent neural
-network (RNN) bricks (LSTM, GRU, support for `attention mechanisms').
+A series of convenience tools were written that allow users to filter the
+symbolic computation graph based on these annotations, and apply transformations
+to the graph. Methods such as weight noise and dropout can be implemented this
+way, resulting in an approach that allows for complex queries such as ``apply
+weight noise to all weights that belong to an LSTM unit whose parent is a brick
+with the name \emph{foo}''.
 
-\todo[inline]{Code sample to show Blocks' syntax?}
+\subsection{Training algorithms}
+
+The implementation of SGD in Blocks is modular, allowing the user to combine
+different `step rules' that modify the descent direction (learning rate scaling,
+momentum, gradient clipping, weight norm clipping, etc.) with a variety of
+algorithms such as steepest descent, AdaGrad, ADADELTA, Adam, RMSProp, etc.
+
+\subsection{Training}
+
+Experiment management is performed using a `main loop', which combines a Theano
+graph with a training algorithm. The main loop has a flexible extension
+interface, which is used to perform tasks such as monitoring validation sets,
+serialization, learning rate scheduling, plotting, printing and saving logs,
+etc.
 
 \section{Fuel}
 
@@ -139,63 +159,56 @@ validation, bootstrapping). It also provides a variety of on-the-fly
 preprocessing methods such as random cropping of images, creating n-grams from
 text files, and the ability to implement many other methods easily.
 
+To sidestep Python's global interpreter lock (GIL) and ensure optimal
+performance, Fuel can perform all operations in a separate process,
+transferring the processed data to the training process using TCP sockets.
+
 Blocks relies on Fuel for its data interface, but Fuel can easily be used by
 other machine learning frameworks that interface with datasets.
 
+\begin{lstlisting}[language=Python,basicstyle=\ttfamily,caption=Iterating over flattened MNIST features in shuffled batches]
+from fuel.datasets import MNIST
+mnist = MNIST(which_set='train')
+data_stream = DataStream(
+    mnist,
+    iteration_scheme=ShuffledScheme(mnist.num_examples, 512)
+)
+flattened = Flatten(data_stream, which_sources=('features',))
+\end{lstlisting}
+
 \subsection{Standardized data format}
 
-Fuel concentrates most of its built-in datasets around one common interface:
-HDF5. In addition to being an efficient format for large datasets that don't
-fit into memory, HDF5 is very easy to organize and document. This allows to
-simplify dataset storage by putting everything into one file and documenting
-how this file is organized with metadata.
-
-The main class for interfacing with HDF5 datasets is the \lstinline$H5PYDataset$
-class. Given a series of assumptions about how data is organized within an HDF5
-file, it is able to parse:
+Datasets are distributed in a wide range of formats. Fuel simplifies dataset
+storage by converting all datasets to annotated HDF5 files. In addition to being
+an efficient format for large datasets that don't fit into memory, HDF5 is easy
+to organize and document. All of the data is stored in a single HDF5 file, with
+the following metadata attached:
 
 \begin{itemize}
-\item What are the data sources available (e.g.\ features, targets, etc.)?
-\item How are these data sources officially split (e.g.\ training, test sets)?
-\item Are some data sources unavailable for some splits (e.g.\ test set only
-      offers unlabeled examples)?
-\item What are the axes semantics for a given data source (e.g.\ batch, feature,
-      width, height, channel, time, etc.)?
+  \item What are the data sources available (e.g.\ features, targets, etc.)?
+  \item How are these data sources officially split (e.g.\ training, validation,
+        and test sets)?
+  \item Are some data sources unavailable for some splits (e.g.\ test set only
+        offers unlabeled examples)?
+  \item What are the axes semantics for a given data source (e.g.\ batch,
+        feature, width, height, channel, time, etc.)?
 \end{itemize}
 
-\todo[inline]{Explain these assumptions in more details?}
-
-This class is flexible enough that most built-in datasets are little more than a
-wrapper that defines the default location of the dataset file and some sensible
-transformations to apply to the data by default. Integrating user data into Fuel
-is also very straightforward if these assumptions are respected.
-
-For small datasets that fit into memory, reading off disk is inefficient.
-\lstinline$H5PYDataset$ supports loading data into memory with the use of a
-\lstinline$load_in_memory$ constructor argument.
+Integrating user data into Fuel is straightforward, and simply requires the data
+to be written to an HDF5 file with metadata according to the specifications.
 
 \subsection{Automated data management}
 
-Fuel offers built-in scripts that automate the task of downloading and
-converting raw data files.
+Fuel offers built-in scripts that automate the task of downloading datasets,
+(similar to e.g.\ \textsc{skdata}\footnote{\url{https://jaberg.github.io/skdata/}})
+and converting them to Fuel's HDF5 specification.
 
 The \lstinline$fuel-download$ script is used to download raw data files.
 Downloading the raw MNIST data files is as easy as typing
-\lstinline$fuel-download mnist$. Under the hood, \lstinline$fuel-download$ uses
-the \lstinline$argparse$ module along with subparsers so that each built-in
-dataset can define its own specific command-line arguments. For instance,
-datasets whose download URL is not publicly available could require that
-the URL is passed as argument to \lstinline$fuel-download$.
+\lstinline$fuel-download mnist$. The \lstinline$fuel-convert$ script is used to
+convert raw data files into HDF5-format.
 
-The \lstinline$fuel-convert$ script is used to convert raw data files into a
-format that Fuel understands, which for most cases is the aforementioned HDF5
-format. Converting the raw MNIST data files into an HDF5 file translates to the
-the \lstinline$fuel-convert mnist$ command. Like for \lstinline$fuel-convert$,
-\lstinline$fuel-download$ uses \lstinline$argparse$ along with subparsers for
-flexibility. This feature is especially handy for large datasets with no
-standardized preprocessing, such as ImageNet.
-
-Reproducibility being a very important feature in research, the
+Reproducibility being an important feature of both Fuel and Blocks, the
 \lstinline$fuel-convert$ script automatically tags all files it creates with
 relevant module and interface versions and the exact command that was used to
 generate these files. Inspection of this metadata is done with the
@@ -212,7 +225,8 @@ This goal is complicated by shortcomings in Python's \textsc{Pickle}
 serialization module, which is unable to serialize many iterators, which Fuel
 heavily depends on in order to iterate over large datasets efficiently. To
 circumvent this we reimplemented the \textsc{itertools} from the Python
-standard library to be serializable.
+standard library to be
+serializable\footnote{\url{https://github.com/dwf/picklable_itertools}}.
 
 As a result, Blocks experiments are able to be interrupted in the middle of a
 pass over the dataset, serialized, and resumed later, without affecting the
