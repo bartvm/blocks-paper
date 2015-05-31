@@ -155,19 +155,25 @@ and saving logs, etc.
 
 Fuel's goal is to provide a common interface to a variety of data formats and
 published datasets such as MNIST, CIFAR-10, ImageNet, etc.\ while making it easy
-for users to write an interface to new datasets. Fuel allows for different ways
-of iterating over these datasets, such as sequential or shuffled minibatches,
-support for in-memory and out-of-core datasets, and resampling (cross
-validation, bootstrapping). It also provides a variety of on-the-fly
-preprocessing methods such as random cropping of images, creating n-grams from
-text files, and the ability to implement many other methods easily.
+for users to write an interface to new datasets.
+
+Blocks relies on Fuel for its data interface, but Fuel can easily be used by
+other machine learning frameworks that interface with datasets.
+
+\section{Iteration and transformation pipeline}
+
+Fuel allows for different ways of iterating over these datasets, such as
+sequential or shuffled minibatches, support for in-memory and out-of-core
+datasets, and resampling (cross validation, bootstrapping).
+
+It also provides a variety of on-the-fly preprocessing methods such as random
+cropping of images, creating n-grams from text files, and the ability to
+implement many other methods easily. These preprocessing steps can be
+chained together to form more complex transformations of the input data.
 
 To sidestep Python's global interpreter lock (GIL) and ensure optimal
 performance, Fuel can perform all operations in a separate process,
 transferring the processed data to the training process using TCP sockets.
-
-Blocks relies on Fuel for its data interface, but Fuel can easily be used by
-other machine learning frameworks that interface with datasets.
 
 \subsection{Standardized data format}
 
