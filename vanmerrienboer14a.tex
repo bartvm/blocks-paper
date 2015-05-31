@@ -76,10 +76,12 @@ Learning Algorithms (MILA) at the University of Montreal. Their focus lies on
 quick prototyping of complex neural network models. The intended target
 audience is researchers.
 
-Several other libraries built on top of Theano exist, including Pylearn2 (also
-developed by MILA), Lasagne, Keras and GroundHog. Blocks differentiates itself
-with a strong focus on research, and through its relationship with Theano.
-Instead of introducing new abstract objects representing `models' or `layers',
+Several other libraries built on top of Theano exist, including Pylearn2
+and GroundHog (also developed by MILA), Lasagne, and Keras. Like its
+MILA-developed predecessors, Blocks maintains a focus on research and
+rapid prototyping. Blocks differentiates itself most notably from the above
+mentioned toolkits in its unique relationship with Theano. Instead of
+introducing new abstract objects representing `models' or `layers',
 Blocks annotates the Theano computation graph, maintaining the flexibility of
 Theano while making large models manageable.
 
@@ -87,6 +89,10 @@ Data processing is an integral part of training neural networks, which is not
 addressed by many of the aforementioned frameworks. \emph{Fuel} aims to fill
 this gap. It provides tools to download datasets and iterate/preprocess them
 efficiently.
+
+Both Blocks and Fuel were developed from the very beginning with a strong focus
+on software engineering best practices. The development teams strive for
+high test coverage, thorough documentation and carefully considered APIs.
 
 \section{Blocks}
 
