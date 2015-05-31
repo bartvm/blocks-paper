@@ -236,7 +236,7 @@ while ensuring the reproducibility of these experiments.
 This goal is complicated by shortcomings in Python's \textsc{Pickle}
 serialization module, which is unable to serialize many iterators, which Fuel
 heavily depends on in order to iterate over large datasets efficiently. To
-circumvent this we reimplemented the \textsc{itertools} from the Python
+circumvent this we reimplemented the \textsc{itertools} module from the Python
 standard library to be
 serializable\footnote{\url{https://github.com/mila-udem/picklable-itertools}}.
 
