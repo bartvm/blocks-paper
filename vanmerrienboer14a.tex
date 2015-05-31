@@ -172,7 +172,7 @@ other machine learning frameworks that interface with datasets.
 \subsection{Standardized data format}
 
 Datasets are distributed in a wide range of formats. Fuel simplifies dataset
-storage by converting all datasets to annotated HDF5
+storage by converting all built-in datasets to annotated HDF5
 files~\citep{hdf5}. In addition to being
 an efficient format for large datasets that don't fit into memory, HDF5 is easy
 to organize and document. All of the data is stored in a single HDF5 file, with
@@ -188,8 +188,11 @@ the following metadata attached:
         feature, width, height, channel, time, etc.)?
 \end{itemize}
 
-Integrating user data into Fuel is straightforward, and simply requires the data
-to be written to an HDF5 file with metadata according to the specifications.
+Integrating user data into Fuel via HDF5 is straightforward, and simply requires
+the data to be written to an HDF5 file with metadata according to the specifications.
+Finally, while standardizing by convention on HDF5, the Fuel dataset API is
+independent of it; users are free to implement dataset objects employing other backends
+and use them with the rest of Fuel's components.
 
 \subsection{Automated data management}
 
