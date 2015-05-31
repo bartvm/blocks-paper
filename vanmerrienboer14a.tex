@@ -115,9 +115,9 @@ orthogonal initialization for recurrent weights, etc.
 Blocks comes with a large number of `bricks'. Besides standard activations and
 transformations used in feedforward networks (maxout, convolutional layers,
 table lookups) these also include a variety of more advanced recurrent neural
-network components like LSTM, GRU, support for attention 
-mechanisms (for reference to different kinds of network architectures, 
-regularization methods, optimization algorithms see ~\cite{Bengio-et-al-2015-Book}).
+network components like LSTM, GRU, and support for attention mechanisms (for an
+overview of different kinds of network architectures, regularization methods,
+and optimization algorithms see~\cite{Bengio-et-al-2015-Book}).
 
 \subsection{Graph management}
 
@@ -130,11 +130,10 @@ Variables can also be annotated with the role they play in a model, such as
 
 A series of convenience tools were written that allow users to filter the
 symbolic computation graph based on these annotations, and apply transformations
-to the graph. Regularization methods such as weight noise and dropout can be 
-implemented this
-way, resulting in an approach that allows for complex queries such as ``apply
-weight noise to all weights that belong to an LSTM unit whose parent is a brick
-with the name \emph{foo}''.
+to the graph. Regularization methods such as weight noise and dropout can be
+implemented this way, resulting in an approach that allows for complex queries
+such as ``apply weight noise to all weights that belong to an LSTM unit whose
+parent is a brick with the name \emph{foo}''.
 
 \subsection{Training algorithms}
 
