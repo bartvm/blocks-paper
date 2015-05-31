@@ -135,18 +135,19 @@ with the name \emph{foo}''.
 
 \subsection{Training algorithms}
 
-The implementation of SGD in Blocks is modular, allowing the user to combine
-different `step rules' that modify the descent direction (learning rate scaling,
-momentum, gradient clipping, weight norm clipping, etc.) with a variety of
-algorithms such as steepest descent, AdaGrad, ADADELTA, Adam, RMSProp, etc.
+The training algorithm in Blocks is composed from different `step
+rules' that modify the descent direction (learning
+rate scaling, momentum, gradient clipping, weight norm
+clipping, etc.). A variety of algorithms such as AdaGrad, ADADELTA, Adam,
+RMSProp are available as step rules.
 
 \subsection{Training}
 
 Experiment management is performed using a `main loop', which combines a Theano
-graph with a training algorithm. The main loop has a flexible extension
-interface, which is used to perform tasks such as monitoring validation sets,
-serialization, learning rate scheduling, plotting, printing and saving logs,
-etc.
+graph with a training algorithm and a Fuel data stream. The main loop has a
+flexible extension interface, which is used to perform tasks such as monitoring
+on a validation set, serialization, learning rate scheduling, plotting, printing
+and saving logs, etc.
 
 \section{Fuel}
 
