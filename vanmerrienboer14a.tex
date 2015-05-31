@@ -27,7 +27,7 @@
 
 \begin{document}
 
-\title{Blocks and Fuel}
+\title{Blocks and Fuel: Frameworks for deep learning}
 
 \author{\name Bart van Merri\"{e}nboer \email bart.van.vanmerrienboer@umontreal.ca \\
         \addr Montreal Institute for Learning Algorithms, University of Montreal, Montreal, Canada
@@ -135,11 +135,11 @@ with the name \emph{foo}''.
 
 \subsection{Training algorithms}
 
-The training algorithm in Blocks is composed from different `step
-rules' that modify the descent direction (learning
-rate scaling, momentum, gradient clipping, weight norm
-clipping, etc.). A variety of algorithms such as AdaGrad, ADADELTA, Adam,
-RMSProp are available as step rules.
+The gradient descent training algorithm in Blocks is composed from different
+`step rules' that modify the descent direction (learning rate scaling,
+momentum, gradient clipping, weight norm clipping, etc.). A variety of
+algorithms such as AdaGrad, ADADELTA, Adam, RMSProp are available as step
+rules.
 
 \subsection{Training}
 
@@ -167,21 +167,11 @@ transferring the processed data to the training process using TCP sockets.
 Blocks relies on Fuel for its data interface, but Fuel can easily be used by
 other machine learning frameworks that interface with datasets.
 
-\begin{lstlisting}[language=Python,basicstyle=\ttfamily,caption=Iterating over flattened MNIST features in shuffled batches]
-from fuel.datasets import MNIST
-mnist = MNIST(which_set='train')
-data_stream = DataStream(
-    mnist,
-    iteration_scheme=ShuffledScheme(mnist.num_examples, 512)
-)
-flattened = Flatten(data_stream, which_sources=('features',))
-\end{lstlisting}
-
 \subsection{Standardized data format}
 
 Datasets are distributed in a wide range of formats. Fuel simplifies dataset
-storage by converting all datasets to annotated HDF5 
-files (see~\cite{hdf5}). In addition to being
+storage by converting all datasets to annotated HDF5
+files~\citep{hdf5}. In addition to being
 an efficient format for large datasets that don't fit into memory, HDF5 is easy
 to organize and document. All of the data is stored in a single HDF5 file, with
 the following metadata attached:
