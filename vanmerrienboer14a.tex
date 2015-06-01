@@ -139,8 +139,9 @@ Variables can also be annotated with the role they play in a model, such as
 
 A series of convenience tools were written that allow users to filter the
 symbolic computation graph based on these annotations, and apply transformations
-to the graph. Regularization methods such as weight noise and dropout can be
-implemented this way, resulting in an approach that allows for complex queries
+to the graph. Many regularization methods such as weight decay, weight noise, or dropout can be
+implemented in a generic, model-agnostic way. Furthermore a complex query mechanism allows 
+for their fine-grained application
 such as ``apply weight noise to all weights that belong to an LSTM unit whose
 parent is a brick with the name \emph{foo}''.
 
