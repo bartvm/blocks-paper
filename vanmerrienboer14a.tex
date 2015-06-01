@@ -45,7 +45,7 @@
         \AND
         \name Yoshua Bengio \email yoshua.bengio@umontreal.ca \\
         \addr Montreal Institute for Learning Algorithms, University of Montreal, Montreal, Canada \\
-        CIFAR Fellow}
+        CIFAR Senior Fellow}
 
 % \editor{?}
 
@@ -58,7 +58,7 @@
   CUDA-support~\citep{Bastien-Theano-2012,bergstra+al:2010-scipy}. It
   facilitates the training of complex neural network models by providing
   parametrized Theano operations, attaching metadata to Theano's symbolic
-  computation graph, and providing an extensive set of utilities to assist
+  computational graph, and providing an extensive set of utilities to assist
   training the networks, e.g.\ training algorithms, logging, monitoring,
   visualization, and serialization. \emph{Fuel} provides a standard format for
   machine learning datasets. It allows the user to easily iterate over large
@@ -74,7 +74,8 @@
 \emph{Blocks} and \emph{Fuel} are being developed by the Montreal Institute of
 Learning Algorithms (MILA) at the University of Montreal. Their focus lies on
 quick prototyping of complex neural network models. The intended target
-audience is researchers.
+audience is researchers who design and experiment machine learning algorithms,
+especially deep learning algorithms.
 
 Several other libraries built on top of Theano exist, including Pylearn2
 and GroundHog (also developed by MILA), Lasagne, and Keras. Like its
@@ -82,7 +83,7 @@ MILA-developed predecessors, Blocks maintains a focus on research and
 rapid prototyping. Blocks differentiates itself most notably from the above
 mentioned toolkits in its unique relationship with Theano. Instead of
 introducing new abstract objects representing `models' or `layers',
-Blocks annotates the Theano computation graph, maintaining the flexibility of
+Blocks annotates the Theano computational graph, maintaining the flexibility of
 Theano while making large models manageable.
 
 Data processing is an integral part of training neural networks, which is not
@@ -114,7 +115,7 @@ matrix of a linear transformation or the filters of a convolutional layer.
 Bricks use these parameters to transform symbolic Theano variables.
 
 Bricks can contain other bricks within them. This introduces a hierarchy on top
-of the flat computation graph defined by Theano, which makes it easier to
+of the flat computational graph defined by Theano, which makes it easier to
 address and configure complex models programmatically.
 
 The parameters of bricks can be initialized using a variety of schemes that are
@@ -130,7 +131,7 @@ and optimization algorithms see~\cite{Bengio-et-al-2015-Book}).
 
 \subsection{Graph management}
 
-Large neural networks can often result in Theano computation graphs containing
+Large neural networks can often result in Theano computational graphs containing
 hundreds of variables and operations. Blocks does not attempt to abstract away
 this complex graph, but to make it manageable by annotating variables in the
 graph. Each input, output, and parameter of a brick is annotated as such.
@@ -138,7 +139,7 @@ Variables can also be annotated with the role they play in a model, such as
 \emph{weights}, \emph{biases}, \emph{filters}, etc.
 
 A series of convenience tools were written that allow users to filter the
-symbolic computation graph based on these annotations, and apply transformations
+symbolic computational graph based on these annotations, and apply transformations
 to the graph. Many regularization methods such as weight decay, weight noise, or dropout can be
 implemented in a generic, model-agnostic way. Furthermore a complex query mechanism allows 
 for their fine-grained application
